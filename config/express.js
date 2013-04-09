@@ -4,7 +4,8 @@
  */
 
 var express = require('express')
-  , h5bp = require('h5bp')
+  , cons = require('consolidate') // for Swig templates
+  , swig = require('swig') // Swig templates, VERY similar to Twig
   , mongoStore = require('connect-mongo')(express)
   , flash = require('connect-flash')
   , helpers = require('view-helpers')
@@ -31,8 +32,13 @@ module.exports = function (app, config, passport, db) {
   app.use(express.logger('dev'))
 
   // set views path, template engine and default layout
-  app.set('views', config.root + '/app/views')
-  app.set('view engine', 'jade')
+  swig.init({
+    root: config.root + '/app/views',
+    allowErrors: true // allows errors to be thrown and caught by express instead of suppressed by Swig
+  });
+  app.set('views', config.root + '/app/views');
+  app.engine('.html', cons.swig);
+  app.set('view engine', 'html');
 
   app.configure(function () {
     // dynamic helpers

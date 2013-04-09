@@ -1,0 +1,80 @@
+{% extends 'layouts/default.html' %}
+
+{% block content %}
+<form ng-controller="Fun">
+  <fieldset>
+    <!-- <legend>Fieldset</legend> -->
+
+    <div class="row">
+      <div class="large-12 columns">
+        <label>Success Regex</label>
+        <input ng-model="success" type="text" placeholder="enter a regex">
+      </div>
+    </div>
+  </fieldset>
+  <div id="message" style="white-space: pre">1    Information    3/30/2013 11:00:02 PM    The "Backup to frontdesk" operation started
+2    Information    3/30/2013 11:00:25 PM    Analyzing partition 0-0...
+3    Information    3/30/2013 11:00:25 PM    Analyzing partition F:...
+4    Information    3/30/2013 11:00:25 PM    Analyzing partition 0-0...
+5    Information    3/30/2013 11:00:26 PM    Analyzing partition C:...
+6    Warning!    3/30/2013 11:00:26 PM    Priority changed to Low priority
+7    Information    3/30/2013 11:00:26 PM    Analyzing partition F:...
+8    Information    3/30/2013 11:00:26 PM    Analyzing partition C:...
+9    Error    3/30/2013 11:00:27 PM    User name or password for the remote resource \\Fng-frontdesk\Acronis\Server1.tib is incorrect. Please check user name and password and type it again.
+10    Error    3/30/2013 11:00:27 PM    User name or password for the remote resource \\Fng-frontdesk\Acronis\Server1.tib is incorrect. Please check user name and password and type it again.
+11    Error    3/30/2013 11:00:27 PM    Operation has completed with errors.</div>
+</form>
+
+{% endblock %}
+{% block head %}
+<style>
+.highlight { background-color: yellow; }
+</style>
+{% endblock %}
+{% block foot %}
+<script>
+
+function Fun($scope) {
+  var text = $('#message').text();
+
+  $scope.$watch("success", function(newVal, oldVal) {
+    if (!newVal) return;
+    try {
+      var regex = new RegExp(newVal, "g");
+      var matches;
+      var highlights = [], start, end;
+      while(matches = regex.exec(text)) {
+        start = matches.index;
+        end = matches[0].length + start;
+        highlights.push({'start': start, 'end': end});
+      }
+      highlight(text, highlights);
+    } catch(e) {
+      // TODO put an error state on the input
+    }
+  });
+
+
+  function highlight(text, highlights) {
+    var message = $('#message')
+      , open = '<span class="highlight">'
+      , close = '</span>'
+      , length = open.length + close.length
+      , offset;
+
+    $.each(highlights, function(i, highlight) {
+      offset = i * length;
+      
+      text = text.substring(0,  offset + highlight.start)
+        + open
+        + text.substring(offset + highlight.start, offset + highlight.end)
+        + close
+        + text.substring(offset + highlight.end)
+    });
+
+    message.html(text);
+
+  }
+}
+</script>
+{% endblock %}
